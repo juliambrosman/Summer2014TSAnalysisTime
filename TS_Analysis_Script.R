@@ -1,6 +1,7 @@
 ##First Look at ARISA Data##----
 arisa.data=read.table("20140613_ARISA_Updated.csv", sep=",",header=TRUE)
 arisa.data$Size<-round(arisa.data$Size, digits=0)
+plot(table(arisa.data$Size))
 
 #take all measurements greater than 1000 bp to look more closely at data
 arisa.data.big<-subset(arisa.data, Size>=1000)
@@ -12,17 +13,17 @@ big2table<-table(arisa.data.big2$Size)
 
 
 #Looked at this table/plot and determined five different groups of cyanobacterial peaks:
-#1108bp to 1125bp-->group 1
-#1130bp to 1142bp-->group 2
-#1211bp to 1245bp-->group 3
-#1267bp to 1304bp-->group 4
-#1310bp to 1336bp-->group 5
+#1108bp to 1125bp-->group 1  Sequence Group 1129 to 1137
+#1130bp to 1142bp-->group 2  Sequence Group 1146 to 1148
+#1211bp to 1240bp-->group 3  Sequence group no sequenced reps
+#1245bp to 1304bp-->group 4  Sequence Group 1300 to 1310
+#1310bp to 1336bp-->group 5  Sequence Group 1350-1360bp
 
 #So now to pull out only peaks within these different groups:
 arisa.data.big2$size.bin[arisa.data.big2$Size>=1108 & arisa.data.big2$Size<=1125]=1
 arisa.data.big2$size.bin[arisa.data.big2$Size>=1130 & arisa.data.big2$Size<=1142]=2
-arisa.data.big2$size.bin[arisa.data.big2$Size>=1211 & arisa.data.big2$Size<=1245]=3
-arisa.data.big2$size.bin[arisa.data.big2$Size>=1267 & arisa.data.big2$Size<=1304]=4
+arisa.data.big2$size.bin[arisa.data.big2$Size>=1211 & arisa.data.big2$Size<=1240]=3
+arisa.data.big2$size.bin[arisa.data.big2$Size>=1245 & arisa.data.big2$Size<=1304]=4
 arisa.data.big2$size.bin[arisa.data.big2$Size>=1310 & arisa.data.big2$Size<=1336]=5
 
 #remove rows with 'na' in size.bin column
@@ -114,7 +115,7 @@ boxplot(alldata$nitrate~alldata$Year+alldata$lake, main="nitrate")
 boxplot(alldata$srp~alldata$Year+alldata$lake, main="srp")
 boxplot(alldata$temp~alldata$Year+alldata$lake, main="temp")
 
-#Setting up subsets to plot
+#Setting up subsets to plot -----
 rl.2012<-filter(alldata,Year==2012, lake=="RL")
 rl.2013<-filter(alldata,Year==2013, lake=="RL")
 gl.2012<-filter(alldata, Year==2012, lake=="GL")
