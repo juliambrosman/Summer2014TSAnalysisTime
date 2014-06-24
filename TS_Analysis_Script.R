@@ -177,7 +177,7 @@ with(all.2013, errbar(date,cyano,
 title(main="cyano 2013")
 
 #plotting cyanophage genotype abundance over time----
-
+library("Hmisc", lib.loc="/Library/Frameworks/R.framework/Versions/3.0/Resources/library")
 #rlcp1 2013
 with(all.2013, errbar(date,rlcp1,
                       yplus=rlcp1+rlcp1.sd,yminus=rlcp1-rlcp1.sd,
@@ -280,7 +280,7 @@ with(all.2012, plot(date,bin5.cyanos,
 with(all.2013, plot(date,bin5.cyanos,
                     col=lake,pch=19, main="bin5.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
 
-##Plotting Bar Graph of all Cyano Genotypes per Lake:
+##Plotting Bar Graph of all Cyano Genotypes per Lake:----
 
 ##pull out just cyano representation:
 cyano.bins<-alldata[,c(1,2,29:33)]
