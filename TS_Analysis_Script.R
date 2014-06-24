@@ -1,21 +1,21 @@
 ##First Look at ARISA Data##----
 arisa.data=read.table("20140613_ARISA_Updated.csv", sep=",",header=TRUE)
 arisa.data$Size<-round(arisa.data$Size, digits=0)
-plot(table(arisa.data$Size))
+plot(table(arisa.data$Size), xlab="fragment length (bp)", ylab="# Samples with Peak")
 
 #take all measurements greater than 1000 bp to look more closely at data
 arisa.data.big<-subset(arisa.data, Size>=1000)
 
 #same wiht 1100bp
 arisa.data.big2<-subset(arisa.data, Size>=1100)
-plot(table(arisa.data.big2$Size))
+plot(table(arisa.data.big2$Size), xlab="fragment length (bp)", ylab="# Samples with Peak")
 big2table<-table(arisa.data.big2$Size)
 
 
 #Looked at this table/plot and determined five different groups of cyanobacterial peaks:
 #1108bp to 1125bp-->group 1  Sequence Group 1129 to 1137
 #1130bp to 1142bp-->group 2  Sequence Group 1146 to 1148
-#1211bp to 1240bp-->group 3  Sequence group no sequenced reps
+#1211bp to 1240bp-->group 3  Sequence group with no sequenced reps
 #1245bp to 1304bp-->group 4  Sequence Group 1300 to 1310
 #1310bp to 1336bp-->group 5  Sequence Group 1350-1360bp
 
@@ -44,6 +44,12 @@ bin2<-filter(arisa.binned, size.bin==2)
 bin3<-filter(arisa.binned, size.bin==3)
 bin4<-filter(arisa.binned, size.bin==4)
 bin5<-filter(arisa.binned, size.bin==5)
+
+summary(bin1$Size)
+summary(bin2$Size)
+summary(bin3$Size)
+summary(bin4$Size)
+summary(bin5$Size)
 
 #group each bin by date and lake
 bin1grouped<-group_by(bin1,date,lake)
@@ -104,8 +110,17 @@ alldata<-merge(alldata, AbundCyano, by=c("date","lake"), all.x=TRUE)
 
 alldata$date <- as.Date(alldata$date, "%m/%d/%y") 
 alldata$lake<-droplevels(alldata$lake)
+# Remove October observations
+alldata<-alldata[alldata$Month!=10,]
+str(alldata)
+#log of cyano abundance:
+alldata$bin1.cyanos<-log(alldata$bin1.cyanos, 10)
+alldata$bin2.cyanos<-log(alldata$bin2.cyanos, 10)
+alldata$bin3.cyanos<-log(alldata$bin3.cyanos, 10)
+alldata$bin4.cyanos<-log(alldata$bin4.cyanos, 10)
+alldata$bin5.cyanos<-log(alldata$bin5.cyanos, 10)
 
-##playing with the data##
+##playing with the data##----
 #boxplots: -----
 boxplot(alldata$bac~alldata$Year+alldata$lake, main="bac")
 boxplot(alldata$bac~alldata$Year+alldata$lake, main="bac")
@@ -234,36 +249,90 @@ title(main="chla 2012")
 ##Plotting Cyanobacterial Genotype Abundance##----
 #bin1.cyanos 2012
 with(all.2012, plot(date,bin1.cyanos,
-                    col=lake,pch=19, main="bin1.cyanos 2012", xlab="date",ylab="uM bin1.cyanos"))
+                    col=lake,pch=19, main="bin1.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
 #bin1.cyanos 2013
 with(all.2013, plot(date,bin1.cyanos,
-                    col=lake,pch=19, main="bin1.cyanos 2013", xlab="date",ylab="uM bin1.cyanos"))
+                    col=lake,pch=19, main="bin1.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
 #bin2.cyanos 2012
 with(all.2012, plot(date,bin2.cyanos,
-                    col=lake,pch=19, main="bin2.cyanos 2012", xlab="date",ylab="uM bin2.cyanos"))
+                    col=lake,pch=19, main="bin2.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
 #bin2.cyanos 2013
 with(all.2013, plot(date,bin2.cyanos,
-                    col=lake,pch=19, main="bin2.cyanos 2013", xlab="date",ylab="uM bin2.cyanos"))
+                    col=lake,pch=19, main="bin2.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
 
 #bin3.cyanos 2012
 with(all.2012, plot(date,bin3.cyanos,
-                    col=lake,pch=19, main="bin3.cyanos 2012", xlab="date",ylab="uM bin3.cyanos"))
+                    col=lake,pch=19, main="bin3.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
 #bin3.cyanos 2013
 with(all.2013, plot(date,bin3.cyanos,
-                    col=lake,pch=19, main="bin3.cyanos 2013", xlab="date",ylab="uM bin3.cyanos"))
+                    col=lake,pch=19, main="bin3.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
 
 #bin4.cyanos 2012
 with(all.2012, plot(date,bin4.cyanos,
-                    col=lake,pch=19, main="bin4.cyanos 2012", xlab="date",ylab="uM bin4.cyanos"))
+                    col=lake,pch=19, main="bin4.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
 #bin4.cyanos 2013
 with(all.2013, plot(date,bin4.cyanos,
-                    col=lake,pch=19, main="bin4.cyanos 2013", xlab="date",ylab="uM bin4.cyanos"))
+                    col=lake,pch=19, main="bin4.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
 #bin5.cyanos 2012
 with(all.2012, plot(date,bin5.cyanos,
-                    col=lake,pch=19, main="bin5.cyanos 2012", xlab="date",ylab="uM bin5.cyanos"))
+                    col=lake,pch=19, main="bin5.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
 #bin5.cyanos 2013
 with(all.2013, plot(date,bin5.cyanos,
-                    col=lake,pch=19, main="bin5.cyanos 2013", xlab="date",ylab="uM bin5.cyanos"))
+                    col=lake,pch=19, main="bin5.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
+
+##Plotting Bar Graph of all Cyano Genotypes per Lake:
+
+##pull out just cyano representation:
+cyano.bins<-alldata[,c(1,2,29:33)]
+
+##Make individual DF per bin and assign bin value in bin column
+cyano.b1<-cyano.bins[,c(1,2,3)]
+View(cyano.b1)
+cyano.b1$bin<-1
+colnames(cyano.b1)[3]<-"log.cyano.ml"
+
+cyano.b2<-cyano.bins[,c(1,2,4)]
+cyano.b2$bin<-2
+colnames(cyano.b2)[3]<-"log.cyano.ml"
+
+cyano.b3<-cyano.bins[,c(1,2,5)]
+cyano.b3$bin<-3
+colnames(cyano.b3)[3]<-"log.cyano.ml"
+
+cyano.b4<-cyano.bins[,c(1,2,6)]
+cyano.b4$bin<-4
+colnames(cyano.b4)[3]<-"log.cyano.ml"
+
+cyano.b5<-cyano.bins[,c(1,2,7)]
+cyano.b5$bin<-5
+colnames(cyano.b5)[3]<-"log.cyano.ml"
+
+#bind rows for all the results into one data matrix
+cyano.combined<-rbind(cyano.b1, cyano.b2, cyano.b3, cyano.b4, cyano.b5)
+View(cyano.combined)
+
+library(ggplot2)
+library(plyr)
+library(reshape2)
+
+#Extract 2012 Values
+#make date a searchable feature:
+cyano.combined$date2 <- as.POSIXlt(cyano.combined$date)
+#Extract 2012 values from Green Lake
+cyano.combined.GL.2012<-cyano.combined[cyano.combined$date2$year==112 & cyano.combined$lake=="GL",]
+
+#sort by date
+cyano.combined.GL.2012<-cyano.combined.GL.2012[order(cyano.combined.GL.2012$date),]
+
+#make date into a factor instead of a date
+cyano.combined.GL.2012$date<-as.factor(cyano.combined.GL.2012$date)
+
+#make bin variable into a factor instead of being interpreted as a number... should've assigned a through e
+cyano.combined.GL.2012$bin<-as.factor(cyano.combined.GL.2012$bin)
+
+#plot it.  still not perfect, but it's somthing...
+ggplot(cyano.combined.GL.2012,aes(date,log.cyano.ml,fill=bin))+
+  geom_bar(stat="identity",position="dodge")
 
 #Comparing Data Vectors----
 with(alldata, plot(bac, vlp, col=lake,pch=19))
