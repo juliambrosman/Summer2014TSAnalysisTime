@@ -1,118 +1,12 @@
-##First Look at ARISA Data##----
-arisa.data=read.table("20140613_ARISA_Updated.csv", sep=",",header=TRUE)
-arisa.data$Size<-round(arisa.data$Size, digits=0)
-plot(table(arisa.data$Size), xlab="fragment length (bp)", ylab="# Samples with Peak")
+###Load output table from "All Integrated" script:
 
-#take all measurements greater than 1000 bp to look more closely at data
-arisa.data.big<-subset(arisa.data, Size>=1000)
+alldata<-read.table("All_Integrated_Output.csv",sep=",",header=TRUE)
+alldata$date<-as.Date(alldata$date, "%Y-%m-%d")
 
-#same wiht 1100bp
-arisa.data.big2<-subset(arisa.data, Size>=1100)
-plot(table(arisa.data.big2$Size), xlab="fragment length (bp)", ylab="# Samples with Peak")
-big2table<-table(arisa.data.big2$Size)
-
-
-#Looked at this table/plot and determined five different groups of cyanobacterial peaks:
-#1108bp to 1125bp-->group 1  Sequence Group 1129 to 1137
-#1130bp to 1142bp-->group 2  Sequence Group 1146 to 1148
-#1211bp to 1240bp-->group 3  Sequence group with no sequenced reps
-#1245bp to 1304bp-->group 4  Sequence Group 1300 to 1310
-#1310bp to 1336bp-->group 5  Sequence Group 1350-1360bp
-
-#So now to pull out only peaks within these different groups:
-arisa.data.big2$size.bin[arisa.data.big2$Size>=1108 & arisa.data.big2$Size<=1125]=1
-arisa.data.big2$size.bin[arisa.data.big2$Size>=1130 & arisa.data.big2$Size<=1142]=2
-arisa.data.big2$size.bin[arisa.data.big2$Size>=1211 & arisa.data.big2$Size<=1240]=3
-arisa.data.big2$size.bin[arisa.data.big2$Size>=1245 & arisa.data.big2$Size<=1304]=4
-arisa.data.big2$size.bin[arisa.data.big2$Size>=1310 & arisa.data.big2$Size<=1336]=5
-
-#remove rows with 'na' in size.bin column
-arisa.binned<-arisa.data.big2[!(is.na(arisa.data.big2$size.bin)),]
-
-#load dplyr package for data manipulation:----
-library("dplyr", lib.loc="/Library/Frameworks/R.framework/Versions/3.0/Resources/library")
-
-#Trying to make a Summary Data Matrix
-
-summary<-group_by(arisa.binned,date,lake)
-
-total.area<-summarise(summary,count=n(),area=sum(Area.in.BP))
-
-#separate the different bin sizes 
-bin1<-filter(arisa.binned, size.bin==1)
-bin2<-filter(arisa.binned, size.bin==2)
-bin3<-filter(arisa.binned, size.bin==3)
-bin4<-filter(arisa.binned, size.bin==4)
-bin5<-filter(arisa.binned, size.bin==5)
-
-summary(bin1$Size)
-summary(bin2$Size)
-summary(bin3$Size)
-summary(bin4$Size)
-summary(bin5$Size)
-
-#group each bin by date and lake
-bin1grouped<-group_by(bin1,date,lake)
-bin2grouped<-group_by(bin2,date,lake)
-bin3grouped<-group_by(bin3,date,lake)
-bin4grouped<-group_by(bin4,date,lake)
-bin5grouped<-group_by(bin5,date,lake)
-
-#calculate total area for each bin at each time point and location
-bin1.area<-summarise(bin1grouped,bin1.area=sum(Area.in.BP))
-bin2.area<-summarise(bin2grouped,bin2.area=sum(Area.in.BP))
-bin3.area<-summarise(bin3grouped,bin3.area=sum(Area.in.BP))
-bin4.area<-summarise(bin4grouped,bin4.area=sum(Area.in.BP))
-bin5.area<-summarise(bin5grouped,bin5.area=sum(Area.in.BP))
-
-#now merging all the documents into one for additional calculations...
-mergetrial<-merge(total.area, bin1.area, by=c("date","lake"), all.x=TRUE)
-mergetrial<-merge(mergetrial, bin2.area, by=c("date","lake"), all.x=TRUE)
-mergetrial<-merge(mergetrial, bin3.area, by=c("date","lake"), all.x=TRUE)
-mergetrial<-merge(mergetrial, bin4.area, by=c("date","lake"), all.x=TRUE)
-mergetrial<-merge(mergetrial, bin5.area, by=c("date","lake"), all.x=TRUE)
-
-#Create column of fraction of representation of each of the peaks
-mergetrial$bin1.rep<-(mergetrial$bin1.area/mergetrial$area)
-mergetrial$bin2.rep<-(mergetrial$bin2.area/mergetrial$area)
-mergetrial$bin3.rep<-(mergetrial$bin3.area/mergetrial$area)
-mergetrial$bin4.rep<-(mergetrial$bin4.area/mergetrial$area)
-mergetrial$bin5.rep<-(mergetrial$bin5.area/mergetrial$area)
-
-Relative.arisa<-mergetrial[,c(1:2,10:14)]
-
-##Now bring in all TS Metadata##----
-alldata=read.table("AllTSMetaData.csv", sep=",",header=TRUE)
-
-#remove empty columns
-alldata$X<-NULL
-alldata$X.1<-NULL
-alldata$X.2<-NULL
-#Remove empty rows
-alldata<-alldata[1:51,]
-
-cyano.counts<-alldata[,c(1,5,21,22)]
-
-cyano.counts.arisa<-merge(cyano.counts, Relative.arisa, by=c("date","lake"), all.x=TRUE)
-
-cyano.counts.arisa$bin1.cyanos<-cyano.counts.arisa$cyano*cyano.counts.arisa$bin1.rep
-cyano.counts.arisa$bin2.cyanos<-cyano.counts.arisa$cyano*cyano.counts.arisa$bin2.rep
-cyano.counts.arisa$bin3.cyanos<-cyano.counts.arisa$cyano*cyano.counts.arisa$bin3.rep
-cyano.counts.arisa$bin4.cyanos<-cyano.counts.arisa$cyano*cyano.counts.arisa$bin4.rep
-cyano.counts.arisa$bin5.cyanos<-cyano.counts.arisa$cyano*cyano.counts.arisa$bin5.rep
-
-AbundCyano<-cyano.counts.arisa[,c(1,2,10:14)]
-
-#Merge cyano bin counts with the rest of the meta data 
-alldata<-merge(alldata, AbundCyano, by=c("date","lake"), all.x=TRUE)
-
-##Cyano Abundance Data is now combined with all other data in the data table, next small fixes## ----
-
-alldata$date <- as.Date(alldata$date, "%m/%d/%y") 
-alldata$lake<-droplevels(alldata$lake)
+###Adjustments### ----
 # Remove October observations
 alldata<-alldata[alldata$Month!=10,]
-str(alldata)
+
 #log of cyano abundance:
 alldata$bin1.cyanos<-log(alldata$bin1.cyanos, 10)
 alldata$bin2.cyanos<-log(alldata$bin2.cyanos, 10)
@@ -248,14 +142,18 @@ title(main="chla 2012")
 
 ##Plotting Cyanobacterial Genotype Abundance##----
 #bin1.cyanos 2012
+
 with(all.2012, plot(date,bin1.cyanos,
-                    col=lake,pch=19, main="bin1.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+                     col=lake, pch=19, main="bin1.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+
 #bin1.cyanos 2013
 with(all.2013, plot(date,bin1.cyanos,
                     col=lake,pch=19, main="bin1.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
+
 #bin2.cyanos 2012
 with(all.2012, plot(date,bin2.cyanos,
                     col=lake,pch=19, main="bin2.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+
 #bin2.cyanos 2013
 with(all.2013, plot(date,bin2.cyanos,
                     col=lake,pch=19, main="bin2.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
@@ -263,6 +161,7 @@ with(all.2013, plot(date,bin2.cyanos,
 #bin3.cyanos 2012
 with(all.2012, plot(date,bin3.cyanos,
                     col=lake,pch=19, main="bin3.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+
 #bin3.cyanos 2013
 with(all.2013, plot(date,bin3.cyanos,
                     col=lake,pch=19, main="bin3.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
@@ -270,20 +169,16 @@ with(all.2013, plot(date,bin3.cyanos,
 #bin4.cyanos 2012
 with(all.2012, plot(date,bin4.cyanos,
                     col=lake,pch=19, main="bin4.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+
 #bin4.cyanos 2013
 with(all.2013, plot(date,bin4.cyanos,
                     col=lake,pch=19, main="bin4.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
-#bin5.cyanos 2012
-with(all.2012, plot(date,bin5.cyanos,
-                    col=lake,pch=19, main="bin5.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
-#bin5.cyanos 2013
-with(all.2013, plot(date,bin5.cyanos,
-                    col=lake,pch=19, main="bin5.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
+
 
 ##Plotting Bar Graph of all Cyano Genotypes per Lake:----
 
 ##pull out just cyano representation:
-cyano.bins<-alldata[,c(1,2,29:33)]
+cyano.bins<-alldata[,c(1,2,21:24)]
 
 ##Make individual DF per bin and assign bin value in bin column
 cyano.b1<-cyano.bins[,c(1,2,3)]
@@ -303,13 +198,8 @@ cyano.b4<-cyano.bins[,c(1,2,6)]
 cyano.b4$bin<-4
 colnames(cyano.b4)[3]<-"log.cyano.ml"
 
-cyano.b5<-cyano.bins[,c(1,2,7)]
-cyano.b5$bin<-5
-colnames(cyano.b5)[3]<-"log.cyano.ml"
-
 #bind rows for all the results into one data matrix
-cyano.combined<-rbind(cyano.b1, cyano.b2, cyano.b3, cyano.b4, cyano.b5)
-View(cyano.combined)
+cyano.combined<-rbind(cyano.b1, cyano.b2, cyano.b3, cyano.b4)
 
 library(ggplot2)
 library(plyr)
@@ -334,13 +224,35 @@ cyano.combined.GL.2012$bin<-as.factor(cyano.combined.GL.2012$bin)
 ggplot(cyano.combined.GL.2012,aes(date,log.cyano.ml,fill=bin))+
   geom_bar(stat="identity",position="dodge")
 
-#Comparing Data Vectors----
+#Comparing Data Vectors... playing with stats----
 with(alldata, plot(bac, vlp, col=lake,pch=19))
-with(alldata, plot(chla,vlp,col=lake,pch=19))
-with(alldata, plot(bac,chla, col=lake,pch=19))
-with(alldata,plot(temp,vlp, col=lake,pch=19))
+alldata$logbac<-with(alldata, log(bac, 10))
+alldata$logvlp<-with(alldata, log(vlp,10))
+with(alldata, plot(logbac, logvlp, col=lake, pch=19))
+#looks like a relationship between viruses and bacteria... not surprising, let's apply a linear model:
+lm<-lm(logbac~logvlp,data=alldata)
+summary(lm)
+hist(lm$residuals)
+stres<-rstandard(lm)
+pred<-predict(lm)
+plot(pred,stres)
 
-##to adda legend to any of these...----
+alldata$vbr<-alldata$vlp/alldata$bac
+with(alldata, plot(date, vbr, col=lake, pch=19))
+with(alldata, plot(cyano, vlp,col=lake,pch=19))
+alldata$logcyano<-log(alldata$cyano)
+alldata$logvlp<-log(alldata$vlp)
+with(alldata, plot(logcyano, vlp, col=lake, pch=19))
+
+with(alldata, plot(logrlcp1,logbin2, col=lake,pch=19))
+alldata$logbin2<-log(alldata$bin2.cyanos, 10)
+
+with(alldata,plot(logrlcp1,logbin3, col=lake,pch=19))
+alldata$logrlcp1<-log(alldata$rlcp1)
+alldata$logbin3<-log(alldata$bin3.cyanos)
+lm1<-lm(logbin3~logrlcp1,data=alldata)
+
+##to add a legend to any of these...----
 legend("topright",c("GL","RL"),pch=19,col=c("green","blue"))
 
 ##Statistics....----
@@ -349,11 +261,13 @@ num.mat<-as.matrix(num.data.all)
 
 hist(alldata$nitrate)
 hist(alldata$srp)
-hist(alldata$nitrate~alldata$lake)
+hist(alldata$lake~alldata$nitrate)
 table(alldata$lake,alldata$nitrate)
 table(alldata$nitrate,alldata$lake)
 boxplot(alldata$nitrate~alldata$lake)
 boxplot(alldata$bac~alldata$lake+alldata$Year)
+boxplot(alldata$vlp~alldata$lake+alldata$Year)
+
 
 vlp.anova<-aov(alldata$vlp~alldata$lake+alldata$Year)
 bac.anova<-aov(alldata$bac~alldata$lake+alldata$Year)
