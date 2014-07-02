@@ -65,7 +65,7 @@ all.cell.counts<-merge(all.cell.counts,vir.counts,by=c("date","lake"),all.x=TRUE
 
 ##Now load qPCR data----
 qpcr.data=read.table("TimeSeriesqPCR_data.csv", sep=",",header=TRUE)
-View(qpcr.data)
+
 ##read data data as a date:
 qpcr.data$date <- as.Date(qpcr.data$date, "%m/%d/%y")
 
@@ -85,12 +85,12 @@ quant.groups<-group_by(qpcr.data,date,lake)
 #Example pooled standard deviation from which I'm working:
 #df$df <- df$n-1
 #pooledSD <- sqrt( sum(df$sd^2 * df$df) / sum(df$df) )
-per.locale<-summarise(quant.groups,count=n(), rlcp1=mean(rlcp1.smpl),
-                      rlcp1.sd=sqrt(sum((rlcp1.smpl.sd^2)*(3-1))/((count*3)-1)), 
-                      rlcp2a=mean(rlcp2a.smpl),
-                      rlcp2a.sd=sqrt(sum((rlcp2a.smpl.sd^2)*(3-1))/((count*3)-1)),
-                      rlcp4=mean(rlcp4.smpl),
-                      rlcp4.sd=sqrt(sum((rlcp4.smpl.sd^2)*(3-1))/((count*3)-1)))
+per.locale<-summarise(quant.groups,count=n(), rlcp1=mean(rlcp1.smpl, na.rm=TRUE),
+                      rlcp1.sd=sqrt(sum((rlcp1.smpl.sd^2)*(3-1), na.rm=TRUE)/((count*3)-1)), 
+                      rlcp2a=mean(rlcp2a.smpl, na.rm=TRUE),
+                      rlcp2a.sd=sqrt(sum((rlcp2a.smpl.sd^2)*(3-1), na.rm=TRUE)/((count*3)-1)),
+                      rlcp4=mean(rlcp4.smpl, na.rm=TRUE),
+                      rlcp4.sd=sqrt(sum((rlcp4.smpl.sd^2)*(3-1),na.rm=TRUE)/((count*3)-1)))
 
 #per.local now holds all the data
 
@@ -175,6 +175,7 @@ arisa.rel.norm[is.na(arisa.rel.norm)]<-0
 #Merge the relative arisa and cyano-count normalized arisa data with other data:
 counts.qpcr.arisa<-merge(arisa.rel.norm,counts.qpcr.data, by=c("date","lake"), all.x=TRUE, all.y=TRUE)
 
+##Integrate physical data ----
 #Now bring in physical data:
 phys.data=read.table("physical_ts_data.csv", sep=",",header=TRUE)
 phys.data$date<-as.Date(phys.data$date, "%m/%d/%y")
@@ -186,4 +187,6 @@ all.data$count<-NULL
 #biovar[is.na(biovar)]<-0
 all.data[is.na(all.data[,17:24])]<-0
 
+##Write table to file----
 write.table(all.data, file="All_Integrated_Output.csv", sep=",")
+
