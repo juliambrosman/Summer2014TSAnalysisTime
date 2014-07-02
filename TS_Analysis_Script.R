@@ -2,6 +2,7 @@
 
 alldata<-read.table("All_Integrated_Output.csv",sep=",",header=TRUE)
 alldata$date<-as.Date(alldata$date, "%Y-%m-%d")
+library("dplyr", lib.loc="/Library/Frameworks/R.framework/Versions/3.0/Resources/library")
 
 ###Adjustments### ----
 # Remove October observations
@@ -12,7 +13,7 @@ alldata$bin1.cyanos<-log(alldata$bin1.cyanos, 10)
 alldata$bin2.cyanos<-log(alldata$bin2.cyanos, 10)
 alldata$bin3.cyanos<-log(alldata$bin3.cyanos, 10)
 alldata$bin4.cyanos<-log(alldata$bin4.cyanos, 10)
-alldata$bin5.cyanos<-log(alldata$bin5.cyanos, 10)
+
 
 ##playing with the data##----
 #boxplots: -----
@@ -31,7 +32,7 @@ gl.2012<-filter(alldata, Year==2012, lake=="GL")
 gl.2013<-filter(alldata, Year==2013, lake=="GL")
 all.2012<-filter(alldata,Year==2012)
 all.2013<-filter(alldata,Year==2013)
-palette(c("green","blue"))
+palette(c("forestgreen","purple"))
 
 ##time series plots of counts/ml per year----
 #Library with errbars function:
@@ -40,70 +41,92 @@ library("Hmisc", lib.loc="/Library/Frameworks/R.framework/Versions/3.0/Resources
 #vlp 2012
 with(all.2012, errbar(date,vlp,
                       yplus=vlp+vlp.sd,yminus=vlp-vlp.sd,
-                      col=lake,pch=19, main="vlp 2012", xlab="date",ylab="vlp/ml"))
-title(main="vlp 2012")
-?plot
+                      col=lake,pch=19, xlab="Date",ylab="VLP/ml"))
+title(main="Virus Like Particle Abundance 2012")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
 #vlp 2013
 with(all.2013, errbar(date,vlp,
                       yplus=vlp+vlp.sd,yminus=vlp-vlp.sd,
-                      col=lake,pch=19, xlab="date",ylab="vlp/ml"))
-title(main="vlp 2013")
+                      col=lake,pch=19, xlab="Date",ylab="VLP/ml"))
+title(main="Virus Like Particles 2013")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
 #bac 2012
 with(all.2012, errbar(date,bac,
                       yplus=bac+bac.sd,yminus=bac-bac.sd,
                       col=lake,pch=19, xlab="date",ylab="bac/ml"))
-title(main="bac 2012")
+title(main="Bacterial Abundance 2012")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
 #bac 2013
 with(all.2013, errbar(date,bac,
                       yplus=bac+bac.sd,yminus=bac-bac.sd,
                       col=lake,pch=19, main="bac 2013", xlab="date",ylab="bac/ml"))
-title(main="bac 2013")
+title(main="Bacterial Abundance 2013")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
 #cyano 2012
 with(all.2012, errbar(date,cyano,
                       yplus=cyano+cyano.sd,yminus=cyano-cyano.sd,
                       col=lake,pch=19, main="cyano 2012", xlab="date",ylab="cyano/ml"))
-title(main="cyano 2012")
+title(main="Picocyanobacteria 2012")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
 
 #cyano 2013
 with(all.2013, errbar(date,cyano,
                       yplus=cyano+cyano.sd,yminus=cyano-cyano.sd,
                       col=lake,pch=19, main="cyano 2013", xlab="date",ylab="cyano/ml"))
-title(main="cyano 2013")
+title(main="Picocyanobacteria 2013")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
 
 #plotting cyanophage genotype abundance over time----
 library("Hmisc", lib.loc="/Library/Frameworks/R.framework/Versions/3.0/Resources/library")
 #rlcp1 2013
 with(all.2013, errbar(date,rlcp1,
                       yplus=rlcp1+rlcp1.sd,yminus=rlcp1-rlcp1.sd,
-                      col=lake,pch=19, main="rlcp1 2013", xlab="date",ylab="rlcp1/ml"))
-title(main="rlcp1 2013")
+                      col=lake,pch=19, main="rlcp1 2013", xlab="date",ylab="copies/ml"))
+title(main="Cyanophagetype rlcp1 2013")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
+
 #rlcp1 2012
 with(all.2012, errbar(date,rlcp1,
                       yplus=rlcp1+rlcp1.sd,yminus=rlcp1-rlcp1.sd,
-                      col=lake,pch=19, main="rlcp1 2013", xlab="date",ylab="rlcp1/ml"))
-title(main="rlcp1 2012")
+                      col=lake,pch=19, main="rlcp1 2013", xlab="date",ylab="copies/ml"))
+title(main="Cyanophage type rlcp1 2012")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
 
 #rlcp2a 2013
 with(all.2013, errbar(date,rlcp2a,
                       yplus=rlcp2a+rlcp2a.sd,yminus=rlcp2a-rlcp2a.sd,
-                      col=lake,pch=19, main="rlcp2a 2013", xlab="date",ylab="rlcp2a/ml"))
-title(main="rlcp2a 2013")
+                      col=lake,pch=19, main="rlcp2a 2013", xlab="date",ylab="copies/ml"))
+title(main="Cyanophage type rlcp2a 2013")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
+
 #rlcp2a 2012
 with(all.2012, errbar(date,rlcp2a,
                       yplus=rlcp2a+rlcp2a.sd,yminus=rlcp2a-rlcp2a.sd,
                       col=lake,pch=19, main="rlcp2a 2013", xlab="date",ylab="rlcp2a/ml"))
-title(main="rlcp2a 2012")
+title(main="Cyanophage type rlcp2a 2012")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
 
 #rlcp4 2013
 with(all.2013, errbar(date,rlcp4,
                       yplus=rlcp4+rlcp4.sd,yminus=rlcp4-rlcp4.sd,
-                      col=lake,pch=19, main="rlcp4 2013", xlab="date",ylab="rlcp4/ml"))
-title(main="rlcp4 2013")
+                      col=lake,pch=19, main="rlcp4 2013", xlab="date",ylab="copies/ml"))
+title(main="Cyanophage type rlcp4 2013")
+legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
+
+
 #rlcp4 2012
 with(all.2012, errbar(date,rlcp4,
                       yplus=rlcp4+rlcp4.sd,yminus=rlcp4-rlcp4.sd,
-                      col=lake,pch=19, main="rlcp4 2013", xlab="date",ylab="rlcp4/ml"))
-title(main="rlcp4 2012")
+                      col=lake,pch=19, main="rlcp4 2013", xlab="date",ylab="copies/ml"))
+title(main="Cyanophage type rlcp4 2012")
 
 ##plotting metadata----
 
@@ -141,38 +164,73 @@ with(all.2012, errbar(date,chla,
 title(main="chla 2012")
 
 ##Plotting Cyanobacterial Genotype Abundance##----
-#bin1.cyanos 2012
 
-with(all.2012, plot(date,bin1.cyanos,
-                     col=lake, pch=19, main="bin1.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+#bin1.cyanos 2012
+with(all.2012, plot(date,bin1.cyanos,type="n", xlab="Date",ylab="cells/ml",main="Cyano Type 1 2012"))
+with(gl.2012,lines(date,bin1.cyanos, col="forestgreen"))
+with(rl.2012, lines(date,bin1.cyanos,col="purple"))
+with(gl.2012, points(date,bin1.cyanos, pch=19, col="forestgreen"))
+with(rl.2012, points(date,bin1.cyanos,pch=19, col="purple"))
+legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
+
 
 #bin1.cyanos 2013
-with(all.2013, plot(date,bin1.cyanos,
-                    col=lake,pch=19, main="bin1.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
+with(all.2013, plot(date,bin1.cyanos,type="n", xlab="Date",ylab="cells/ml",main="Cyano Type 1 2013"))
+with(gl.2013,lines(date,bin1.cyanos, col="forestgreen"))
+with(rl.2013, lines(date,bin1.cyanos,col="purple"))
+with(gl.2013, points(date,bin1.cyanos, pch=19, col="forestgreen"))
+with(rl.2013, points(date,bin1.cyanos,pch=19, col="purple"))
+legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
 
 #bin2.cyanos 2012
-with(all.2012, plot(date,bin2.cyanos,
-                    col=lake,pch=19, main="bin2.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+with(all.2012, plot(date,bin2.cyanos,type="n", xlab="Date",ylab="cells/ml",main="Cyano Type 2 2012"))
+with(gl.2012,lines(date,bin2.cyanos, col="forestgreen"))
+with(rl.2012, lines(date,bin2.cyanos,col="purple"))
+with(gl.2012, points(date,bin2.cyanos, pch=19, col="forestgreen"))
+with(rl.2012, points(date,bin2.cyanos,pch=19, col="purple"))
+legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
+
 
 #bin2.cyanos 2013
-with(all.2013, plot(date,bin2.cyanos,
-                    col=lake,pch=19, main="bin2.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
+with(all.2013, plot(date,bin2.cyanos,type="n", xlab="Date",ylab="cells/ml",main="Cyano Type 2 2013"))
+with(gl.2013,lines(date,bin2.cyanos, col="forestgreen"))
+with(rl.2013, lines(date,bin2.cyanos,col="purple"))
+with(gl.2013, points(date,bin2.cyanos, pch=19, col="forestgreen"))
+with(rl.2013, points(date,bin2.cyanos,pch=19, col="purple"))
+legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
 
 #bin3.cyanos 2012
-with(all.2012, plot(date,bin3.cyanos,
-                    col=lake,pch=19, main="bin3.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+with(all.2012, plot(date,bin3.cyanos,type="n", xlab="Date",ylab="cells/ml",main="Cyano Type 3 2012"))
+with(gl.2012,lines(date,bin3.cyanos, col="forestgreen"))
+with(rl.2012, lines(date,bin3.cyanos,col="purple"))
+with(gl.2012, points(date,bin3.cyanos, pch=19, col="forestgreen"))
+with(rl.2012, points(date,bin3.cyanos,pch=19, col="purple"))
+legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
+
 
 #bin3.cyanos 2013
-with(all.2013, plot(date,bin3.cyanos,
-                    col=lake,pch=19, main="bin3.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
+with(all.2013, plot(date,bin3.cyanos,type="n", xlab="Date",ylab="cells/ml",main="Cyano Type 3 2013"))
+with(gl.2013,lines(date,bin3.cyanos, col="forestgreen"))
+with(rl.2013, lines(date,bin3.cyanos,col="purple"))
+with(gl.2013, points(date,bin3.cyanos, pch=19, col="forestgreen"))
+with(rl.2013, points(date,bin3.cyanos,pch=19, col="purple"))
+legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
 
 #bin4.cyanos 2012
-with(all.2012, plot(date,bin4.cyanos,
-                    col=lake,pch=19, main="bin4.cyanos 2012", xlab="date",ylab="log(cells/ml)"))
+with(all.2012, plot(date,bin4.cyanos,type="n", xlab="Date",ylab="cells/ml",main="Cyano Type 4 2012"))
+with(gl.2012,lines(date,bin4.cyanos, col="forestgreen"))
+with(rl.2012, lines(date,bin4.cyanos,col="purple"))
+with(gl.2012, points(date,bin4.cyanos, pch=19, col="forestgreen"))
+with(rl.2012, points(date,bin4.cyanos,pch=19, col="purple"))
+legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
 
 #bin4.cyanos 2013
-with(all.2013, plot(date,bin4.cyanos,
-                    col=lake,pch=19, main="bin4.cyanos 2013", xlab="date",ylab="log(cells/ml)"))
+with(all.2013, plot(date,bin4.cyanos,type="n", xlab="Date",ylab="cells/ml",main="Cyano Type 4 2013"))
+with(gl.2013,lines(date,bin4.cyanos, col="forestgreen"))
+with(rl.2013, lines(date,bin4.cyanos,col="purple"))
+with(gl.2013, points(date,bin4.cyanos, pch=19, col="forestgreen"))
+with(rl.2013, points(date,bin4.cyanos,pch=19, col="purple"))
+legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
 
 
 ##Plotting Bar Graph of all Cyano Genotypes per Lake:----
