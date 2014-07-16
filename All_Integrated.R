@@ -189,4 +189,4 @@ all.data[is.na(all.data[,17:24])]<-0
 
 ##Write table to file----
 write.table(all.data, file="All_Integrated_Output.csv", sep=",")
-
+View(all.data)

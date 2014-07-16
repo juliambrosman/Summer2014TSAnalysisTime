@@ -1,5 +1,6 @@
 ###Load output table from "All Integrated" script:
 library("dplyr", lib.loc="/Library/Frameworks/R.framework/Versions/3.0/Resources/library")
+library("Hmisc", lib.loc="/Library/Frameworks/R.framework/Versions/3.0/Resources/library")
 
 alldata<-read.table("All_Integrated_Output.csv",sep=",",header=TRUE)
 alldata$date<-as.Date(alldata$date, "%Y-%m-%d")
@@ -7,6 +8,7 @@ alldata$date<-as.Date(alldata$date, "%Y-%m-%d")
 ###Adjustments### ----
 # Remove October observations
 alldata<-alldata[alldata$Month!=10,]
+alldata<-alldata[alldata$Month!=9,]
 
 #log of cyano abundance:
 alldata$bin1.cyanos<-log((alldata$bin1.cyanos+1), 10)
@@ -28,28 +30,23 @@ gl.2012<-filter(alldata, Year==2012, lake=="GL")
 gl.2013<-filter(alldata, Year==2013, lake=="GL")
 all.2012<-filter(alldata,Year==2012)
 all.2013<-filter(alldata,Year==2013)
+rl.all<-filter(alldata,lake=="RL")
+gl.all<-filter(alldata,lake=="GL")
 palette(c("forestgreen","purple"))
 
 
 ##playing with the data##----
-#boxplots: -----
-boxplot(alldata$bac~alldata$Year+alldata$lake, main="bac")
-boxplot(alldata$bac~alldata$Year+alldata$lake, main="bac")
-boxplot(alldata$cyano~alldata$Year+alldata$lake, main="cyano")
-boxplot(alldata$chla~alldata$Year+alldata$lake, main="chla")
-boxplot(alldata$nitrate~alldata$Year+alldata$lake, main="nitrate")
-boxplot(alldata$srp~alldata$Year+alldata$lake, main="srp")
-boxplot(alldata$temp~alldata$Year+alldata$lake, main="temp")
+
 
 
 ##time series plots of counts/ml per year----
 #Library with errbars function:
-library("Hmisc", lib.loc="/Library/Frameworks/R.framework/Versions/3.0/Resources/library")
+
 
 #vlp 2012
-with(all.2012, errbar(date,vlp,
+with(alldata, errbar(date,vlp,
                       yplus=vlp+vlp.sd,yminus=vlp-vlp.sd,
-                      col=lake,pch=19, xlab="Date",ylab="VLP/ml"))
+                      col=lake+year,pch=19, xlab="Date",ylab="VLP/ml"))
 title(main="Virus Like Particle Abundance 2012")
 legend("topright",c("GL","RL"),pch=19,col=c("forestgreen","purple"))
 
@@ -136,40 +133,6 @@ with(all.2012, errbar(date,rlcp4,
                       col=lake,pch=19, main="rlcp4 2013", xlab="date",ylab="copies/ml"))
 title(main="Cyanophage type rlcp4 2012")
 
-##plotting metadata----
-
-##Nitrate
-#nitrate 2012
-with(all.2012, plot(date,nitrate,
-                      col=lake,pch=19, main="nitrate", xlab="date",ylab="uM Nitrate"))
-#nitrate 2013
-with(all.2013, plot(date,nitrate,
-                    col=lake,pch=19, main="nitrate", xlab="date",ylab="uM Nitrate"))
-##Nitrite
-#nitrite 2012
-with(all.2012, plot(date,nitrite,
-                    col=lake,pch=19, main="nitrite", xlab="date",ylab="uM nitrite"))
-#nitrite 2013
-with(all.2013, plot(date,nitrite,
-                    col=lake,pch=19, main="nitrite", xlab="date",ylab="uM nitrite"))
-##SRP
-#srp 2012
-with(all.2012, plot(date,srp,
-                    col=lake,pch=19, main="srp", xlab="date",ylab="uM srp"))
-#srp 2013
-with(all.2013, plot(date,srp,
-                    col=lake,pch=19, main="srp", xlab="date",ylab="uM srp"))
-##ChlA
-#chla 2013
-with(all.2013, errbar(date,chla,
-                      yplus=chla+chla.sd,yminus=chla-chla.sd,
-                      col=lake,pch=19, main="chla 2013", xlab="date",ylab="chla/ml"))
-title(main="chla 2013")
-#chla 2012
-with(all.2012, errbar(date,chla,
-                      yplus=chla+chla.sd,yminus=chla-chla.sd,
-                      col=lake,pch=19, main="chla 2013", xlab="date",ylab="chla/ml"))
-title(main="chla 2012")
 
 ##Plotting Cyanobacterial Genotype Abundance##----
 
@@ -241,12 +204,11 @@ with(rl.2013, points(date,bin4.cyanos,pch=19, col="purple"))
 legend("topright",c("GL","RL"),pch=19, col=c("forestgreen","purple"))
 
 ##Plotting Cyanobacterial Genotype Abundance Per Lake Per Year----
-?jpeg
 
 #GL 2012
 
 layout(rbind(1,2), heights=c(15,1))
-with(all.2012, plot(date,bin3.cyanos,type="n", xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance GL 2012"))
+with(all.2012, plot(date,bin2.cyanos,type="n", ylim=c(0,4),xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance GL 2012"))
 with(gl.2012,lines(date,bin1.cyanos, col="forestgreen"))
 with(gl.2012, points(date,bin1.cyanos, pch=19, col="forestgreen"))
 with(gl.2012,lines(date,bin2.cyanos, col="purple"))
@@ -259,12 +221,13 @@ par(mar=c(0, 0, 0, 0))
 plot.new()
 legend('center','groups',c("Type1","Type2","Type3","Type4"),pch=19,
        col=c("forestgreen","purple","orange","blue"),ncol=4,bty ="n")
+
 dev.off()
 
 
 #RL 2012
 layout(rbind(1,2), heights=c(15,1))
-with(all.2012, plot(date,bin3.cyanos,type="n", xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance RL 2012"))
+with(all.2012, plot(date,bin3.cyanos,type="n", ylim=c(0,4),xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance RL 2012"))
 with(rl.2012, lines(date,bin1.cyanos,col="forestgreen"))
 with(rl.2012, points(date,bin1.cyanos,pch=19, col="forestgreen"))
 with(rl.2012, lines(date,bin2.cyanos,col="purple"))
@@ -277,11 +240,12 @@ par(mar=c(0, 0, 0, 0))
 plot.new()
 legend('center','groups',c("Type1","Type2","Type3","Type4"),pch=19,
        col=c("forestgreen","purple","orange","blue"),ncol=4,bty ="n")
+
 dev.off()
 
 #GL 2013
 layout(rbind(1,2), heights=c(7,1))
-with(all.2013, plot(date,bin1.cyanos,type="n", xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance GL 2013"))
+with(all.2013, plot(date,bin1.cyanos,type="n", ylim=c(0,5), xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance GL 2013"))
 with(gl.2013,lines(date,bin1.cyanos, col="forestgreen"))
 with(gl.2013, points(date,bin1.cyanos, pch=19, col="forestgreen"))
 with(gl.2013,lines(date,bin2.cyanos, col="purple"))
@@ -299,7 +263,7 @@ dev.off()
 
 #RL 2013
 layout(rbind(1,2), heights=c(15,1))
-with(all.2013, plot(date,bin1.cyanos,type="n", xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Abundance RL 2013"))
+with(all.2013, plot(date,bin1.cyanos,type="n", ylim=c(0,5), xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Abundance RL 2013"))
 with(rl.2013, lines(date,bin1.cyanos,col="forestgreen"))
 with(rl.2013, points(date,bin1.cyanos,pch=19, col="forestgreen"))
 with(rl.2013, lines(date,bin2.cyanos,col="purple"))
@@ -322,7 +286,6 @@ cyano.bins<-alldata[,c(1,2,21:24)]
 
 ##Make individual DF per bin and assign bin value in bin column
 cyano.b1<-cyano.bins[,c(1,2,3)]
-View(cyano.b1)
 cyano.b1$bin<-1
 colnames(cyano.b1)[3]<-"log.cyano.ml"
 
@@ -354,9 +317,6 @@ cyano.combined.GL.2012<-cyano.combined[cyano.combined$date2$year==112 & cyano.co
 #sort by date
 cyano.combined.GL.2012<-cyano.combined.GL.2012[order(cyano.combined.GL.2012$date),]
 
-#make date into a factor instead of a date
-cyano.combined.GL.2012$date<-as.factor(cyano.combined.GL.2012$date)
-
 #make bin variable into a factor instead of being interpreted as a number... should've assigned a through e
 cyano.combined.GL.2012$bin<-as.factor(cyano.combined.GL.2012$bin)
 
@@ -364,69 +324,114 @@ cyano.combined.GL.2012$bin<-as.factor(cyano.combined.GL.2012$bin)
 ggplot(cyano.combined.GL.2012,aes(date,log.cyano.ml,fill=bin))+
   geom_bar(stat="identity",position="dodge")
 
+##RL 2012:
+#Extract 2012 values from Round Lake
+cyano.combined.RL.2012<-cyano.combined[cyano.combined$date2$year==112 & cyano.combined$lake=="RL",]
+
+#sort by date
+cyano.combined.RL.2012<-cyano.combined.RL.2012[order(cyano.combined.RL.2012$date),]
+
+
+#make bin variable into a factor instead of being interpreted as a number... should've assigned a through e
+cyano.combined.RL.2012$bin<-as.factor(cyano.combined.RL.2012$bin)
+
+#plot it.  still not perfect, but it's somthing...
+ggplot(cyano.combined.RL.2012,aes(date,log.cyano.ml,fill=bin))+
+  geom_bar(stat="identity",position="dodge")
+
+
+#Extract 2013 values from Green Lake
+cyano.combined.GL.2013<-cyano.combined[cyano.combined$date2$year==113 & cyano.combined$lake=="GL",]
+
+#sort by date
+cyano.combined.GL.2013<-cyano.combined.GL.2013[order(cyano.combined.GL.2013$date),]
+
+
+#make bin variable into a factor instead of being interpreted as a number... should've assigned a through e
+cyano.combined.GL.2013$bin<-as.factor(cyano.combined.GL.2013$bin)
+
+#plot it.  still not perfect, but it's somthing...
+ggplot(cyano.combined.GL.2013,aes(date,log.cyano.ml,fill=bin))+
+  geom_bar(stat="identity",position="dodge")
+
+
+#Extract 2013 values from Round Lake
+cyano.combined.RL.2013<-cyano.combined[cyano.combined$date2$year==113 & cyano.combined$lake=="RL",]
+
+#sort by date
+cyano.combined.RL.2013<-cyano.combined.RL.2013[order(cyano.combined.RL.2013$date),]
+
+#make bin variable into a factor instead of being interpreted as a number... should've assigned a through e
+cyano.combined.RL.2013$bin<-as.factor(cyano.combined.RL.2013$bin)
+
+#plot it.  still not perfect, but it's somthing...
+ggplot(cyano.combined.RL.2013,aes(date,log.cyano.ml,fill=bin))+
+  geom_bar(stat="identity",position="dodge")
+
+
 ## Plotting graph of log cyanophage types per year per lake----
 
 #GL 2012
 layout(rbind(1,2), heights=c(15,1))
 with(all.2012, plot(date,log.rlcp1,type="n", xlab="Date",ylab="log(copies/ml)",main="Cyanophage Genotype Abundance GL 2012"))
-with(gl.2012,lines(date,log.rlcp1, col="lightblue"))
-with(gl.2012, points(date,log.rlcp1, pch=18, col="lightblue"))
+with(gl.2012,lines(date,log.rlcp1, col="navy"))
+with(gl.2012, points(date,log.rlcp1, pch=18, col="navy"))
 with(gl.2012,lines(date,log.rlcp2a, col="magenta"))
 with(gl.2012, points(date,log.rlcp2a, pch=18, col="magenta"))
-with(gl.2012,lines(date,log.rlcp4, col="aquamarine"))
-with(gl.2012, points(date,log.rlcp4, pch=18, col="aquamarine"))
+with(gl.2012,lines(date,log.rlcp4, col="turquoise"))
+with(gl.2012, points(date,log.rlcp4, pch=18, col="turquoise"))
 par(mar=c(0, 0, 0, 0))
 plot.new()
 legend('center','groups',c("rlcp1","rlcp2a","rlcp4"),pch=18,
-       col=c("lightblue","magenta","aquamarine"),ncol=3,bty ="n")
+       col=c("navy","magenta","turquoise"),ncol=3,bty ="n")
 
 dev.off()
 
 #RL 2012
 layout(rbind(1,2), heights=c(15,1))
 with(all.2012, plot(date,log.rlcp1,type="n", xlab="Date",ylab="log(copies/ml)",main="Cyanophage Genotype Abundance RL 2012"))
-with(rl.2012,lines(date,log.rlcp1, col="lightblue"))
-with(rl.2012, points(date,log.rlcp1, pch=18, col="lightblue"))
+with(rl.2012,lines(date,log.rlcp1, col="navy"))
+with(rl.2012, points(date,log.rlcp1, pch=18, col="navy"))
 with(rl.2012,lines(date,log.rlcp2a, col="magenta"))
 with(rl.2012, points(date,log.rlcp2a, pch=18, col="magenta"))
-with(rl.2012,lines(date,log.rlcp4, col="aquamarine"))
-with(rl.2012, points(date,log.rlcp4, pch=18, col="aquamarine"))
+with(rl.2012,lines(date,log.rlcp4, col="turquoise"))
+with(rl.2012, points(date,log.rlcp4, pch=18, col="turquoise"))
 par(mar=c(0, 0, 0, 0))
 plot.new()
 legend('center','groups',c("rlcp1","rlcp2a","rlcp4"),pch=18,
-       col=c("lightblue","magenta","aquamarine"),ncol=3,bty ="n")
+       col=c("navy","magenta","turquoise"),ncol=3,bty ="n")
 
 dev.off()
 
 #GL 2013
 layout(rbind(1,2), heights=c(15,1))
 with(all.2013, plot(date,log.rlcp2a,type="n", xlab="Date",ylab="log(copies/ml)",main="Cyanophage Genotype Abundance GL 2013"))
-with(gl.2013,lines(date,log.rlcp1, col="lightblue"))
-with(gl.2013, points(date,log.rlcp1, pch=18, col="lightblue"))
+with(gl.2013,lines(date,log.rlcp1, col="navy"))
+with(gl.2013, points(date,log.rlcp1, pch=18, col="navy"))
 with(gl.2013,lines(date,log.rlcp2a, col="magenta"))
 with(gl.2013, points(date,log.rlcp2a, pch=18, col="magenta"))
-with(gl.2013,lines(date,log.rlcp4, col="aquamarine"))
-with(gl.2013, points(date,log.rlcp4, pch=18, col="aquamarine"))
+with(gl.2013,lines(date,log.rlcp4, col="turquoise"))
+with(gl.2013, points(date,log.rlcp4, pch=18, col="turquoise"))
 par(mar=c(0, 0, 0, 0))
 plot.new()
 legend('center','groups',c("rlcp1","rlcp2a","rlcp4"),pch=18,
-       col=c("lightblue","magenta","aquamarine"),ncol=3,bty ="n")
+       col=c("navy","magenta","turquoise"),ncol=3,bty ="n")
 
 dev.off()
 
 #RL 2013
 layout(rbind(1,2), heights=c(15,1))
 with(all.2013, plot(date,log.rlcp2a,type="n", xlab="Date",ylab="log(copies/ml)",main="Cyanophage Genotype Abundance RL 2013"))
-with(rl.2013,lines(date,log.rlcp1, col="lightblue"))
-with(rl.2013, points(date,log.rlcp1, pch=18, col="lightblue"))
+with(rl.2013,lines(date,log.rlcp1, col="navy"))
+with(rl.2013, points(date,log.rlcp1, pch=18, col="navy"))
 with(rl.2013,lines(date,log.rlcp2a, col="magenta"))
 with(rl.2013, points(date,log.rlcp2a, pch=18, col="magenta"))
-with(rl.2013,lines(date,log.rlcp4, col="aquamarine"))
-with(rl.2013, points(date,log.rlcp4, pch=18, col="aquamarine"))
+with(rl.2013,lines(date,log.rlcp4, col="turquoise"))
+with(rl.2013, points(date,log.rlcp4, pch=18, col="turquoise"))
 par(mar=c(0, 0, 0, 0))
 plot.new()
 legend('center','groups',c("rlcp1","rlcp2a","rlcp4"),pch=18,
-       col=c("lightblue","magenta","aquamarine"),ncol=3,bty ="n")
+       col=c("navy","magenta","turquoise"),ncol=3,bty ="n")
 
 dev.off()
 
@@ -475,8 +480,96 @@ boxplot(alldata$nitrate~alldata$lake)
 boxplot(alldata$bac~alldata$lake+alldata$Year)
 boxplot(alldata$vlp~alldata$lake+alldata$Year)
 
+lm1<-lm(log(alldata$rlcp1), log(alldata$bin2.cyano))
 
 vlp.anova<-aov(alldata$vlp~alldata$lake+alldata$Year)
 bac.anova<-aov(alldata$bac~alldata$lake+alldata$Year)
 vlp.anova
 bac.anova
+
+
+## look at cyano representation rather than abundance:----
+layout(rbind(1,2), heights=c(15,1))
+with(all.2012, plot(x=date,y=bin1.rep,type="n", ylim=c(0,1),xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance GL 2012"))
+with(gl.2012,lines(date,bin1.rep, col="forestgreen"))
+with(gl.2012, points(date,bin1.rep, pch=19, col="forestgreen"))
+with(gl.2012,lines(date,bin2.rep, col="purple"))
+with(gl.2012, points(date,bin2.rep, pch=19, col="purple"))
+with(gl.2012,lines(date,bin3.rep, col="orange"))
+with(gl.2012, points(date,bin3.rep, pch=19, col="orange"))
+with(gl.2012,lines(date,bin4.rep, col="blue"))
+with(gl.2012, points(date,bin4.rep, pch=19, col="blue"))
+par(mar=c(0, 0, 0, 0))
+plot.new()
+legend('center','groups',c("Type1","Type2","Type3","Type4"),pch=19,
+       col=c("forestgreen","purple","orange","blue"),ncol=4,bty ="n")
+dev.off()
+
+
+#RL 2012
+layout(rbind(1,2), heights=c(15,1))
+with(all.2012, plot(date,bin3.rep,type="n", ylim=c(0,1), xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance RL 2012"))
+with(rl.2012, lines(date,bin1.rep,col="forestgreen"))
+with(rl.2012, points(date,bin1.rep,pch=19, col="forestgreen"))
+with(rl.2012, lines(date,bin2.rep,col="purple"))
+with(rl.2012, points(date,bin2.rep,pch=19, col="purple"))
+with(rl.2012, lines(date,bin3.rep,col="orange"))
+with(rl.2012, points(date,bin3.rep,pch=19, col="orange"))
+with(rl.2012, lines(date,bin4.rep,col="blue"))
+with(rl.2012, points(date,bin4.rep,pch=19, col="blue"))
+par(mar=c(0, 0, 0, 0))
+plot.new()
+legend('center','groups',c("Type1","Type2","Type3","Type4"),pch=19,
+       col=c("forestgreen","purple","orange","blue"),ncol=4,bty ="n")
+dev.off()
+
+#GL 2013
+layout(rbind(1,2), heights=c(7,1))
+with(all.2013, plot(date,bin1.rep,type="n", ylim=c(0,1), xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Genotype Abundance GL 2013"))
+with(gl.2013,lines(date,bin1.rep, col="forestgreen"))
+with(gl.2013, points(date,bin1.rep, pch=19, col="forestgreen"))
+with(gl.2013,lines(date,bin2.rep, col="purple"))
+with(gl.2013, points(date,bin2.rep, pch=19, col="purple"))
+with(gl.2013,lines(date,bin3.rep, col="orange"))
+with(gl.2013, points(date,bin3.rep, pch=19, col="orange"))
+with(gl.2013,lines(date,bin4.rep, col="blue"))
+with(gl.2013, points(date,bin4.rep, pch=19, col="blue"))
+par(mar=c(0, 0, 0, 0))
+plot.new()
+legend('center','groups',c("Type1","Type2","Type3","Type4"),pch=19,
+       col=c("forestgreen","purple","orange","blue"),ncol=4,bty ="n")
+dev.off()
+
+
+#RL 2013
+layout(rbind(1,2), heights=c(15,1))
+with(all.2013, plot(date,bin1.rep,type="n", ylim=c(0,1), xlab="Date",ylab="log(cells/ml)",main="Cyanobacterial Abundance RL 2013"))
+with(rl.2013, lines(date,bin1.rep,col="forestgreen"))
+with(rl.2013, points(date,bin1.rep,pch=19, col="forestgreen"))
+with(rl.2013, lines(date,bin2.rep,col="purple"))
+with(rl.2013, points(date,bin2.rep,pch=19, col="purple"))
+with(rl.2013, lines(date,bin3.rep,col="orange"))
+with(rl.2013, points(date,bin3.rep,pch=19, col="orange"))
+with(rl.2013, lines(date,bin4.rep,col="blue"))
+with(rl.2013, points(date,bin4.rep,pch=19, col="blue"))
+par(mar=c(0, 0, 0, 0))
+plot.new()
+legend('center','groups',c("Type1","Type2","Type3","Type4"),pch=19,
+       col=c("forestgreen","purple","orange","blue"),ncol=4,bty ="n")
+dev.off()
+
+##Compare RL and GL parameters ----
+ 
+str(gl.all)
+colnames(gl.all)<-paste("g.",colnames(gl.all),sep="")
+colnames(rl.all)<-paste("r.",colnames(rl.all),sep="")
+str(rl.all)
+colnames(rl.all)[1]<-"date"
+colnames(gl.all)[1]<-"date"
+gl.bio<-gl.all[,c(35,33,31,29,27,25:21,1)]
+rl.bio<-rl.all[,c(35,33,31,29,27,25:21,1)]
+lakes.bio<-merge(gl.bio,rl.bio,by="date")
+lakes.bio.mat<-as.matrix(lakes.bio[,2:21])
+str(lakes.bio)
+lakes.bio.cor<-cor(lakes.bio.mat, method="spearman", use="na.or.complete")
+View(lakes.bio.cor)

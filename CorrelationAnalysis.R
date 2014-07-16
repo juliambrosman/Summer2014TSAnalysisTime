@@ -2,7 +2,7 @@
 
 alldata<-read.table("All_Integrated_Output.csv",sep=",",header=TRUE)
 alldata$date<-as.Date(alldata$date, "%Y-%m-%d")
-alldata$date<-as.POSIXlt(alldata$date)
+alldata$date2<-as.POSIXlt(alldata$date)
 alldata$Year<-as.factor(alldata$Year)
 
 #Load dplyr package:
@@ -49,3 +49,17 @@ gl2012.virskewed.mat<-as.matrix(allbiodata.gl.virskewed[,2:12])
 
 cor.gl2012.virskewed<-cor(gl2012.virskewed.mat, use="na.or.complete",method="spearman")
 View(cor.gl2012.virskewed)
+
+#Skew by two weeks:
+allbiodata2012.gl<-allbiodata2012.gl[order(allbiodata2012.gl$date),]
+allbiodata2012.gl.vir<-allbiodata2012.gl[,c("vlp","rlcp1","rlcp2a","rlcp4")]
+allbiodata2012.gl.bac<-allbiodata2012.gl[,c("bin1.cyanos","bin2.cyanos","bin3.cyanos","bin4.cyanos","bac","cyano","chla")]
+allbiodata2012.gl.vir$numbered<-c(1:17)
+allbiodata2012.gl.bac$numbered<-c(3:19)
+
+allbiodata.gl.virskewed<-merge(allbiodata2012.gl.vir,allbiodata2012.gl.bac,by="numbered")
+View(allbiodata.gl.virskewed)
+gl2012.virskewed.mat<-as.matrix(allbiodata.gl.virskewed[,2:12])
+
+cor.gl2012.virskewed.2wk<-cor(gl2012.virskewed.mat, use="na.or.complete",method="spearman")
+View(cor.gl2012.virskewed.2wk)
